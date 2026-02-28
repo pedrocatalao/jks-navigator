@@ -415,6 +415,9 @@ def _usage() -> str:
 
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
+    if any(arg in {"-h", "--help"} for arg in argv):
+        print(_usage())
+        return 0
     if _is_tui_only_opts(argv):
         from . import tui
 

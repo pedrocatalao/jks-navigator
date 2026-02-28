@@ -298,9 +298,16 @@ def _draw(stdscr: curses.window, state: AppState) -> None:
     title = " jks-navigator TUI "
     location = state.keystore_path or "<no keystore loaded>"
     header = f"{title} | {location}"
+    status_text = f" {state.status} "
     stdscr.attron(curses.color_pair(1))
     stdscr.addnstr(0, 0, header.ljust(w), w)
     stdscr.attroff(curses.color_pair(1))
+    if status_text.strip():
+        status_w = min(max(0, w // 2), max(0, len(status_text)))
+        start_x = max(0, w - status_w - 1)
+        stdscr.attron(curses.color_pair(1))
+        stdscr.addnstr(0, start_x, status_text, max(0, w - start_x - 1))
+        stdscr.attroff(curses.color_pair(1))
 
     aliases = _visible_aliases(state)
     if aliases:
@@ -369,11 +376,10 @@ def _draw(stdscr: curses.window, state: AppState) -> None:
     stdscr.addnstr(h - 2, 0, help_line.ljust(w), w)
     stdscr.attroff(curses.color_pair(2))
 
-    status_color = 5 if state.error else 2
-    stdscr.attron(curses.color_pair(status_color))
-    # Avoid writing the bottom-right corner cell; curses may raise ERR there.
-    stdscr.addnstr(h - 1, 0, f" {state.status}".ljust(w), max(0, w - 1))
-    stdscr.attroff(curses.color_pair(status_color))
+    # Keep the last line black and empty.
+    stdscr.attron(curses.color_pair(6))
+    stdscr.addnstr(h - 1, 0, " " * max(0, w - 1), max(0, w - 1))
+    stdscr.attroff(curses.color_pair(6))
     stdscr.refresh()
 
 
@@ -407,6 +413,7 @@ def _run(stdscr: curses.window, initial_path: str | None, initial_storepass: str
     curses.init_pair(3, curses.COLOR_BLACK, curses.COLOR_YELLOW)
     curses.init_pair(4, curses.COLOR_RED, -1)
     curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_RED)
+    curses.init_pair(6, curses.COLOR_BLACK, curses.COLOR_BLACK)
 
     state = AppState()
     if initial_path is not None:
@@ -506,7 +513,7 @@ def _run(stdscr: curses.window, initial_path: str | None, initial_storepass: str
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="jksnav-tui",
+        prog="jksnav",
         description="Interactive TUI for browsing JKS keystores.",
     )
     parser.add_argument("keystore", nargs="?", help="Path to JKS keystore")

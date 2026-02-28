@@ -55,11 +55,11 @@ jksnav -delete -alias demo -keystore keystore.jks -storepass changeit
 dual-pane alias/details layout.
 
 ```bash
-./jksnav-tui -keystore keystore.jks -storepass changeit
+jksnav -keystore keystore.jks -storepass changeit
 # or if installed via pip:
-jksnav-tui -keystore keystore.jks -storepass changeit
+jksnav -keystore keystore.jks -storepass changeit
 # or
-jksnav-tui keystore.jks
+jksnav keystore.jks
 ```
 
 You can also launch the TUI via `jksnav` when no command is provided:

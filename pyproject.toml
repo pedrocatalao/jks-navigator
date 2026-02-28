@@ -19,7 +19,6 @@ test = [
 
 [project.scripts]
 jksnav = "jksnav.cli:main"
-jksnav-tui = "jksnav.tui:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
