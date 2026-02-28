@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyjakey"
+version = "0.1.0"
+description = "Pure Python JKS keytool-compatible utility"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "cryptography>=42.0.0"
+]
+
+[project.scripts]
+pykeytool = "pyjakey.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
