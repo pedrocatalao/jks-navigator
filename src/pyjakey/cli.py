@@ -217,7 +217,18 @@ def _cmd_exportcert(opts: dict[str, str | bool]) -> int:
         cert_der = entry.cert.cert_data
     cert = load_x509_der(cert_der)
     if rfc:
-        data = cert_to_pem(cert)
+        pem_lines = cert_to_pem(cert).decode("ascii").splitlines()
+        if len(pem_lines) >= 2 and pem_lines[0].startswith("-----BEGIN ") and pem_lines[-1].startswith("-----END "):
+            head = pem_lines[0]
+            body = pem_lines[1:-1]
+            tail = pem_lines[-1]
+            body_block = "\r\n".join(body)
+            if body_block:
+                data = (head + "\n" + body_block + "\n" + tail + "\n").encode("ascii")
+            else:
+                data = (head + "\n" + tail + "\n").encode("ascii")
+        else:
+            data = cert_to_pem(cert)
     else:
         data = cert_to_der(cert)
     if isinstance(out_file, str):
@@ -370,7 +381,7 @@ def _cmd_keypasswd(opts: dict[str, str | bool]) -> int:
 
 def _usage() -> str:
     return (
-        "Usage: pykeytool <command> [options]\n"
+        "Usage: jksnav <command> [options]\n"
         "Commands:\n"
         "  -list -keystore <file> [-storepass <pass>] [-v]\n"
         "  -importcert -alias <a> -file <cert> -keystore <file> [-storepass <pass>] [-noprompt]\n"

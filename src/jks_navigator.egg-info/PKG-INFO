@@ -1,3 +1,13 @@
+Metadata-Version: 2.4
+Name: jks-navigator
+Version: 0.1.0
+Summary: Pure Python JKS keytool-compatible utility
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: cryptography>=42.0.0
+Provides-Extra: test
+Requires-Dist: pytest>=8.0.0; extra == "test"
+
 # jks navigator
 
 `jks navigator` is a zero-Java-dependency Python implementation of a `keytool`-style
