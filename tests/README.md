@@ -25,7 +25,7 @@ commands.
 ## Run
 
 ```bash
-cd /Users/pedro/Git/pyjakey
+cd /Users/pedro/Git/jksnav
 python3 -m pip install -e ".[test]"
 pytest -q
 ```

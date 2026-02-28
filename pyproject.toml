@@ -18,7 +18,8 @@ test = [
 ]
 
 [project.scripts]
-jksnav = "pyjakey.cli:main"
+jksnav = "jksnav.cli:main"
+jksnav-tui = "jksnav.tui:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

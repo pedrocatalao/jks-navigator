@@ -1,2 +1,2 @@
 [console_scripts]
-jksnav = pyjakey.cli:main
+jksnav = jksnav.cli:main

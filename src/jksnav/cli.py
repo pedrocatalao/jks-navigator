@@ -67,6 +67,21 @@ def _parse_args(argv: list[str]) -> tuple[str | None, dict[str, str | bool]]:
     return cmd, opts
 
 
+def _is_tui_only_opts(argv: list[str]) -> bool:
+    if not argv:
+        return True
+    allowed = {"-keystore", "-storepass"}
+    i = 0
+    while i < len(argv):
+        tok = argv[i]
+        if tok not in allowed:
+            return False
+        if i + 1 >= len(argv):
+            return False
+        i += 2
+    return True
+
+
 def _need_opt(opts: dict[str, str | bool], name: str) -> str:
     val = opts.get(name)
     if val is None or isinstance(val, bool):
@@ -400,6 +415,10 @@ def _usage() -> str:
 
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
+    if _is_tui_only_opts(argv):
+        from . import tui
+
+        return tui.main(argv)
     try:
         cmd, opts = _parse_args(argv)
     except ValueError as exc:

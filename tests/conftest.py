@@ -48,7 +48,7 @@ def run_cmd(cmd: list[str], env: dict[str, str], check: bool = True, input_text:
 
 @pytest.fixture
 def jksnav_cmd() -> list[str]:
-    return [sys.executable, "-m", "pyjakey.cli"]
+    return [sys.executable, "-m", "jksnav.cli"]
 
 
 @pytest.fixture

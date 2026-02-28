@@ -6,7 +6,7 @@ VENV_DIR="${ROOT_DIR}/.venv"
 VENV_PY="${VENV_DIR}/bin/python"
 
 if ! command -v python3 >/dev/null 2>&1; then
-  echo "jksnav bootstrap error: python3 is required but was not found in PATH" >&2
+  echo "jksnav-tui bootstrap error: python3 is required but was not found in PATH" >&2
   exit 1
 fi
 
@@ -16,10 +16,10 @@ fi
 
 if ! "${VENV_PY}" -c "import cryptography" >/dev/null 2>&1; then
   if ! "${VENV_PY}" -m pip install cryptography >/dev/null; then
-    echo "jksnav bootstrap error: failed to install required dependency 'cryptography'." >&2
-    echo "Check network/PyPI access, then run ./jksnav again." >&2
+    echo "jksnav-tui bootstrap error: failed to install required dependency 'cryptography'." >&2
+    echo "Check network/PyPI access, then run ./jksnav-tui again." >&2
     exit 1
   fi
 fi
 
-exec env PYTHONPATH="${ROOT_DIR}/src" "${VENV_PY}" -m jksnav.cli "$@"
+exec env PYTHONPATH="${ROOT_DIR}/src" "${VENV_PY}" -m jksnav.tui "$@"

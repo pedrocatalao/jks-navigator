@@ -49,6 +49,35 @@ jksnav -importcert -alias ca -keystore keystore.jks -storepass changeit -file ca
 jksnav -delete -alias demo -keystore keystore.jks -storepass changeit
 ```
 
+## TUI Mode
+
+`jks-navigator` now includes a curses TUI inspired by `keyzerchief`, with a
+dual-pane alias/details layout.
+
+```bash
+./jksnav-tui -keystore keystore.jks -storepass changeit
+# or if installed via pip:
+jksnav-tui -keystore keystore.jks -storepass changeit
+# or
+jksnav-tui keystore.jks
+```
+
+You can also launch the TUI via `jksnav` when no command is provided:
+
+```bash
+jksnav
+jksnav -keystore keystore.jks -storepass changeit
+```
+
+Keyboard shortcuts:
+- `Tab`: switch between alias pane and details pane
+- `Up/Down`, `PgUp/PgDn`, `Home/End`: navigate
+- `/`: set alias filter
+- `c`: clear filter
+- `o`: open another keystore
+- `r`: reload current keystore
+- `q` or `Esc`: quit
+
 ## Testing
 
 Unit/parity tests live in `tests/` and compare behavior with Java `keytool`

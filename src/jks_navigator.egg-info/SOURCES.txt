@@ -6,9 +6,9 @@ src/jks_navigator.egg-info/dependency_links.txt
 src/jks_navigator.egg-info/entry_points.txt
 src/jks_navigator.egg-info/requires.txt
 src/jks_navigator.egg-info/top_level.txt
-src/pyjakey/__init__.py
-src/pyjakey/__main__.py
-src/pyjakey/cli.py
-src/pyjakey/crypto.py
-src/pyjakey/jks.py
+src/jksnav/__init__.py
+src/jksnav/__main__.py
+src/jksnav/cli.py
+src/jksnav/crypto.py
+src/jksnav/jks.py
 tests/test_keytool_parity.py
