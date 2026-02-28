@@ -64,6 +64,113 @@ def _prompt(stdscr: curses.window, label: str, secret: bool = False, initial: st
             text.append(chr(ch))
 
 
+def _picker_entries(current: Path) -> list[tuple[str, Path, bool]]:
+    entries: list[tuple[str, Path, bool]] = []
+    parent = current.parent if current.parent != current else current
+    entries.append(("../", parent, True))
+    try:
+        children = sorted(current.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower()))
+    except OSError:
+        return entries
+    for child in children:
+        if child.is_dir():
+            entries.append((f"{child.name}/", child, True))
+        elif child.suffix.lower() == ".jks":
+            entries.append((child.name, child, False))
+    return entries
+
+
+def _pick_jks_file(stdscr: curses.window, start_dir: Path | None = None) -> str | None:
+    current = (start_dir or Path.cwd()).expanduser().resolve()
+    if not current.is_dir():
+        current = current.parent if current.parent.exists() else Path.cwd()
+    selected = 0
+    scroll = 0
+
+    while True:
+        h, w = stdscr.getmaxyx()
+        if h < 10 or w < 40:
+            stdscr.erase()
+            stdscr.addnstr(0, 0, "Window too small for file picker. Resize, then press any key.", max(0, w - 1))
+            stdscr.refresh()
+            ch = stdscr.getch()
+            if ch in (27, ord("q"), ord("Q")):
+                return None
+            continue
+        modal_h = min(max(16, h - 6), h - 2)
+        modal_w = min(max(72, w - 8), w - 2)
+        top = max(0, (h - modal_h) // 2)
+        left = max(0, (w - modal_w) // 2)
+        win = curses.newwin(modal_h, modal_w, top, left)
+        win.keypad(True)
+
+        entries = _picker_entries(current)
+        if entries:
+            selected = max(0, min(selected, len(entries) - 1))
+        else:
+            selected = 0
+        rows = modal_h - 6
+        if selected < scroll:
+            scroll = selected
+        if selected >= scroll + rows:
+            scroll = selected - rows + 1
+        scroll = max(0, scroll)
+
+        win.erase()
+        win.box()
+        win.addnstr(0, 2, " Open Keystore ", max(0, modal_w - 4))
+        win.addnstr(1, 2, str(current), max(0, modal_w - 4))
+        win.addnstr(2, 2, "Choose a folder or .jks file", max(0, modal_w - 4))
+
+        for i in range(rows):
+            idx = scroll + i
+            if idx >= len(entries):
+                break
+            label, _, _ = entries[idx]
+            row = 4 + i
+            if idx == selected:
+                win.attron(curses.color_pair(3))
+                win.addnstr(row, 2, label.ljust(modal_w - 4), max(0, modal_w - 5))
+                win.attroff(curses.color_pair(3))
+            else:
+                win.addnstr(row, 2, label, max(0, modal_w - 5))
+
+        help_line = "Enter open/select | Backspace/h parent | Esc cancel"
+        win.addnstr(modal_h - 2, 2, help_line, max(0, modal_w - 4))
+        win.refresh()
+
+        ch = win.getch()
+        if ch in (27, ord("q"), ord("Q")):
+            return None
+        if ch in (curses.KEY_UP, ord("k")) and entries:
+            selected = max(0, selected - 1)
+            continue
+        if ch in (curses.KEY_DOWN, ord("j")) and entries:
+            selected = min(len(entries) - 1, selected + 1)
+            continue
+        if ch == curses.KEY_PPAGE and entries:
+            selected = max(0, selected - rows)
+            continue
+        if ch == curses.KEY_NPAGE and entries:
+            selected = min(len(entries) - 1, selected + rows)
+            continue
+        if ch in (curses.KEY_BACKSPACE, 127, 8, ord("h")):
+            current = current.parent if current.parent != current else current
+            selected = 0
+            scroll = 0
+            continue
+        if ch in (10, 13):
+            if not entries:
+                continue
+            _, target, is_dir = entries[selected]
+            if is_dir:
+                current = target
+                selected = 0
+                scroll = 0
+                continue
+            return str(target)
+
+
 def _visible_aliases(state: AppState) -> list[str]:
     if state.store is None:
         return []
@@ -251,8 +358,8 @@ def _draw(stdscr: curses.window, state: AppState) -> None:
 
 
 def _open_flow(stdscr: curses.window, state: AppState) -> None:
-    existing = state.keystore_path or ""
-    path = _prompt(stdscr, "Keystore path (Esc cancels):", secret=False, initial=existing)
+    existing = state.keystore_path or str(Path.cwd())
+    path = _pick_jks_file(stdscr, Path(existing))
     if path is None or not path.strip():
         state.status = "Open cancelled."
         state.error = False
@@ -288,6 +395,22 @@ def _run(stdscr: curses.window, initial_path: str | None, initial_storepass: str
         except Exception as exc:
             state.status = f"Startup load failed: {exc}"
             state.error = True
+    else:
+        selected = _pick_jks_file(stdscr, Path.cwd())
+        if selected is None:
+            state.status = "No keystore selected. Press 'o' to open."
+            state.error = False
+        else:
+            pw = _prompt(stdscr, "Store password (Esc cancels):", secret=True, initial=initial_storepass or "")
+            if pw is None:
+                state.status = "Open cancelled. Press 'o' to open."
+                state.error = False
+            else:
+                try:
+                    _load_keystore(state, selected, pw)
+                except Exception as exc:
+                    state.status = f"Startup load failed: {exc}"
+                    state.error = True
 
     while True:
         _draw(stdscr, state)

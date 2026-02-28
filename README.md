@@ -69,6 +69,9 @@ jksnav
 jksnav -keystore keystore.jks -storepass changeit
 ```
 
+When launched without `-keystore`, a centered file-picker modal opens so you
+can browse folders and select a `.jks` file.
+
 Keyboard shortcuts:
 - `Tab`: switch between alias pane and details pane
 - `Up/Down`, `PgUp/PgDn`, `Home/End`: navigate
