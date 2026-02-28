@@ -159,6 +159,26 @@ def _pick_jks_file(stdscr: curses.window, start_dir: Path | None = None) -> str 
             selected = 0
             scroll = 0
             continue
+        if 32 <= ch <= 126:
+            key = chr(ch).lower()
+            if key.isalnum() and entries:
+                # Prefer real files over directories for type-to-jump.
+                file_match = next(
+                    (
+                        i
+                        for i, (label, _, is_dir) in enumerate(entries)
+                        if not is_dir and label.lower().startswith(key)
+                    ),
+                    None,
+                )
+                any_match = next(
+                    (i for i, (label, _, _) in enumerate(entries) if label.lower().startswith(key)),
+                    None,
+                )
+                match = file_match if file_match is not None else any_match
+                if match is not None:
+                    selected = match
+            continue
         if ch in (10, 13):
             if not entries:
                 continue
