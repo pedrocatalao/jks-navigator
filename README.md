@@ -1,17 +1,45 @@
-# jks navigator
+# jks-navigator
 
-`jks navigator` is a zero-Java-dependency Python implementation of a `keytool`-style
-CLI for inspecting and manipulating JKS keystores.
+`jks-navigator` is a pure Python, zero-Java-runtime CLI for inspecting and
+manipulating Java KeyStore (JKS) files with `keytool`-style commands.
 
-## Install
+## Requirements
+
+- Python `3.11+`
+- `cryptography` (installed automatically via package dependency)
+
+## Quick Start
+
+### Option 1: Install editable package
 
 ```bash
-pip install -e .
+python3 -m pip install -e .
+jksnav -list -keystore keystore.jks -storepass changeit
 ```
 
-## CLI
+### Option 2: Use bundled launcher script
 
-The CLI accepts keytool-like commands and options:
+The `./jksnav` script bootstraps a local virtual environment in `.venv/`,
+installs `cryptography` if needed, and runs the CLI directly from `src/`.
+
+```bash
+./jksnav -list -keystore keystore.jks -storepass changeit
+```
+
+## Supported Commands
+
+- `-list`
+- `-importcert`
+- `-exportcert`
+- `-printcert`
+- `-importkeystore`
+- `-delete`
+- `-changealias`
+- `-genkeypair`
+- `-storepasswd`
+- `-keypasswd`
+
+## Common Examples
 
 ```bash
 jksnav -list -keystore keystore.jks -storepass changeit
@@ -21,8 +49,19 @@ jksnav -importcert -alias ca -keystore keystore.jks -storepass changeit -file ca
 jksnav -delete -alias demo -keystore keystore.jks -storepass changeit
 ```
 
-## Notes
+## Testing
 
-- Store type supported: `JKS`
-- No Java runtime required
-- Focused on JKS parity with common `keytool` flows
+Unit/parity tests live in `tests/` and compare behavior with Java `keytool`
+for covered operations.
+
+```bash
+python3 -m pip install -e ".[test]"
+pytest -q
+```
+
+If `keytool` is not available in `PATH`, parity tests are skipped.
+
+## Scope
+
+- Keystore format supported: `JKS`
+- Focused on parity with common `keytool` JKS workflows
